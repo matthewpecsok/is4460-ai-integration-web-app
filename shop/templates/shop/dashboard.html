@@ -1,0 +1,88 @@
+{% extends 'shop/base.html' %}
+
+{% block content %}
+<h1>Internal Monitoring Dashboard</h1>
+<p>Live operational snapshot and recent JSON log events.</p>
+
+<section>
+    <h2>Application Metrics</h2>
+    <div class="cards">
+        <article class="card">
+            <div>Products</div>
+            <p class="metric">{{ metrics.product_count }}</p>
+        </article>
+        <article class="card">
+            <div>Out of Stock</div>
+            <p class="metric">{{ metrics.out_of_stock_count }}</p>
+        </article>
+        <article class="card">
+            <div>Total Orders</div>
+            <p class="metric">{{ metrics.order_count }}</p>
+        </article>
+        <article class="card">
+            <div>Orders (24h)</div>
+            <p class="metric">{{ metrics.orders_last_24h }}</p>
+        </article>
+    </div>
+</section>
+
+<section>
+    <h2>Recent Log Levels</h2>
+    <div class="cards">
+        <article class="card">
+            <div>INFO</div>
+            <p class="metric">{{ log_counts.INFO }}</p>
+        </article>
+        <article class="card">
+            <div>WARNING</div>
+            <p class="metric">{{ log_counts.WARNING }}</p>
+        </article>
+        <article class="card">
+            <div>ERROR</div>
+            <p class="metric">{{ log_counts.ERROR }}</p>
+        </article>
+    </div>
+</section>
+
+<section>
+    <h2>Recent Request Logs</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Timestamp (UTC)</th>
+                <th>Level</th>
+                <th>Event</th>
+                <th>Method</th>
+                <th>Path</th>
+                <th>Status</th>
+                <th>Duration (ms)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in recent_logs %}
+            <tr>
+                <td>{{ log.timestamp }}</td>
+                <td>
+                    {% if log.level == 'ERROR' %}
+                        <span class="badge error">{{ log.level }}</span>
+                    {% elif log.level == 'WARNING' %}
+                        <span class="badge warning">{{ log.level }}</span>
+                    {% else %}
+                        <span class="badge info">{{ log.level }}</span>
+                    {% endif %}
+                </td>
+                <td>{{ log.message }}</td>
+                <td>{{ log.method }}</td>
+                <td>{{ log.path }}</td>
+                <td>{{ log.status_code }}</td>
+                <td>{{ log.duration_ms }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7">No logs found yet. Generate traffic to populate this dashboard.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}

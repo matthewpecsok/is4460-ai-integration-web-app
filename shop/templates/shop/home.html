@@ -1,0 +1,46 @@
+{% extends 'shop/base.html' %}
+
+{% block content %}
+<section class="page-heading">
+    <div>
+        <p class="eyebrow">Fresh arrivals</p>
+        <h1>Shop flowers for delivery</h1>
+        <p class="lead">Choose an arrangement, review the details, and complete checkout with your billing information.</p>
+    </div>
+</section>
+
+<div class="product-grid">
+    {% for product in products %}
+        {% url 'checkout' product.pk as checkout_url %}
+        <article class="product-card">
+            <div class="product-visual" aria-hidden="true"></div>
+            <div>
+                <h2><a href="{% url 'product_detail' product.pk %}">{{ product.name }}</a></h2>
+                <p class="product-description">{{ product.description|default:"A seasonal arrangement prepared by the shop."|truncatewords:18 }}</p>
+            </div>
+            <div class="product-meta">
+                <span class="price">${{ product.price }}</span>
+                {% if product.in_stock %}
+                    <span class="status">In stock</span>
+                {% else %}
+                    <span class="status unavailable">Out of stock</span>
+                {% endif %}
+            </div>
+            <div class="actions">
+                <a class="button secondary" href="{% url 'product_detail' product.pk %}">Details</a>
+                {% if product.in_stock %}
+                    {% if user.is_authenticated %}
+                        <a class="button" href="{{ checkout_url }}">Buy Now</a>
+                    {% else %}
+                        <a class="button" href="{% url 'login' %}?next={{ checkout_url|urlencode }}">Buy Now</a>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </article>
+    {% empty %}
+        <div class="empty-state">
+            <p>No products are available yet.</p>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

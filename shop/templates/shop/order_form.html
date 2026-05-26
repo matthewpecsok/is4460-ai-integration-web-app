@@ -1,0 +1,21 @@
+{% extends 'shop/base.html' %}
+
+{% block content %}
+<section class="page-heading">
+    <div>
+        <p class="eyebrow">Orders</p>
+        <h1>{% if object %}Edit{% else %}Create{% endif %} Order</h1>
+    </div>
+</section>
+
+<section class="panel">
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="actions">
+            <button type="submit">Save</button>
+            <a class="button secondary" href="{{ cancel_url|default:'/' }}">Cancel</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends 'shop/base.html' %}
+
+{% block content %}
+{% url 'checkout' product.pk as checkout_url %}
+<div class="detail-layout">
+    <section>
+        <p class="eyebrow">Product details</p>
+        <h1>{{ product.name }}</h1>
+        <p class="lead">{{ product.description|default:"A seasonal arrangement prepared by the shop." }}</p>
+        <div class="product-meta">
+            <span class="price">${{ product.price }}</span>
+            {% if product.in_stock %}
+                <span class="status">In stock</span>
+            {% else %}
+                <span class="status unavailable">Out of stock</span>
+            {% endif %}
+        </div>
+        <div class="actions" style="margin-top: 1rem;">
+            {% if product.in_stock %}
+                {% if user.is_authenticated %}
+                    <a class="button" href="{{ checkout_url }}">Order This Arrangement</a>
+                {% else %}
+                    <a class="button" href="{% url 'login' %}?next={{ checkout_url|urlencode }}">Login to Purchase</a>
+                {% endif %}
+            {% else %}
+                <span class="button muted">Currently Unavailable</span>
+            {% endif %}
+            <a class="button secondary" href="{% url 'product_list' %}">Back to Products</a>
+        </div>
+    </section>
+
+    <aside class="panel">
+        <div class="product-visual" aria-hidden="true"></div>
+        {% if user.is_authenticated %}
+            {% for group in user.groups.all %}
+                {% if group.name == "employee" %}
+                    <div class="actions" style="margin-top: 1rem;">
+                        <a class="button secondary" href="{% url 'product_update' product.pk %}">Edit</a>
+                        <a class="button danger" href="{% url 'product_delete' product.pk %}">Delete</a>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    </aside>
+</div>
+{% endblock %}

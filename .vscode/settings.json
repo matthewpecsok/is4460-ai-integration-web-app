@@ -1,0 +1,15 @@
+{
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true,
+  "python.testing.unittestArgs": [
+    "-v",
+    "-s",
+    "./shop",
+    "-p",
+    "tests.py"
+  ],
+  "python.envFile": "${workspaceFolder}/.env.example",
+  "python.testing.pytestArgs": [
+    "."
+  ]
+}

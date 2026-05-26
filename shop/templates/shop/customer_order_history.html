@@ -1,0 +1,50 @@
+{% extends 'shop/base.html' %}
+
+{% block content %}
+<section class="page-heading">
+    <div>
+        <p class="eyebrow">Account</p>
+        <h1>My Orders</h1>
+    </div>
+    <div class="actions">
+        <a class="button" href="{% url 'order_create' %}">Create Order</a>
+        <a class="button secondary" href="{% url 'product_list' %}">Continue Shopping</a>
+    </div>
+</section>
+
+{% if orders %}
+    <table>
+        <thead>
+            <tr>
+                <th>Order</th>
+                <th>Items</th>
+                <th>Status</th>
+                <th>Total</th>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+                <tr>
+                    <td><a href="{% url 'customer_order_detail' order.pk %}">Order #{{ order.pk }}</a></td>
+                    <td>
+                        {% for product in order.products.all %}
+                            {{ product.name }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td>{{ order.get_status_display }}</td>
+                    <td>${{ order.total }}</td>
+                    <td>{{ order.created_at|date:"M j, Y" }}</td>
+                    <td><a href="{% url 'order_update' order.pk %}">Edit</a></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <section class="empty-state">
+        <p>You do not have any orders yet.</p>
+        <a class="button" href="{% url 'product_list' %}">Shop Products</a>
+    </section>
+{% endif %}
+{% endblock %}

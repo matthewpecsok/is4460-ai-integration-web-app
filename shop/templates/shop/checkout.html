@@ -1,0 +1,68 @@
+{% extends 'shop/base.html' %}
+
+{% block content %}
+<section class="page-heading">
+    <div>
+        <p class="eyebrow">Checkout</p>
+        <h1>Complete your purchase</h1>
+    </div>
+</section>
+
+<div class="checkout-layout">
+    <section class="panel">
+        <h2>Billing Details</h2>
+        <form method="post">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                {{ form.non_field_errors }}
+            {% endif %}
+            <div class="form-grid">
+                <div class="full">
+                    {{ form.billing_name.label_tag }}
+                    {{ form.billing_name }}
+                    {{ form.billing_name.errors }}
+                </div>
+                <div class="full">
+                    {{ form.billing_email.label_tag }}
+                    {{ form.billing_email }}
+                    {{ form.billing_email.errors }}
+                </div>
+                <div class="full">
+                    {{ form.billing_address.label_tag }}
+                    {{ form.billing_address }}
+                    {{ form.billing_address.errors }}
+                </div>
+                <div>
+                    {{ form.billing_city.label_tag }}
+                    {{ form.billing_city }}
+                    {{ form.billing_city.errors }}
+                </div>
+                <div>
+                    {{ form.billing_state.label_tag }}
+                    {{ form.billing_state }}
+                    {{ form.billing_state.errors }}
+                </div>
+                <div>
+                    {{ form.billing_zip.label_tag }}
+                    {{ form.billing_zip }}
+                    {{ form.billing_zip.errors }}
+                </div>
+            </div>
+            <div class="actions" style="margin-top: 1rem;">
+                <button type="submit">Purchase</button>
+                <a class="button secondary" href="{% url 'product_detail' product.pk %}">Back</a>
+            </div>
+        </form>
+    </section>
+
+    <aside class="panel">
+        <div class="product-visual" aria-hidden="true"></div>
+        <h2 style="margin-top: 1rem;">{{ product.name }}</h2>
+        <p>{{ product.description|default:"A seasonal arrangement prepared by the shop." }}</p>
+        <div class="totals">
+            <span>Total</span>
+            <span>${{ product.price }}</span>
+        </div>
+    </aside>
+</div>
+{% endblock %}

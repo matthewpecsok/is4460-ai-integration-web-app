@@ -1,0 +1,17 @@
+{
+  "name": "flower-shop-django",
+  "image": "mcr.microsoft.com/devcontainers/python:1-3.12-bookworm",
+  "postCreateCommand": "sudo rm -f /etc/apt/sources.list.d/yarn.list && sudo apt-get update && sudo apt-get install -y git-lfs nodejs npm && git lfs install && sudo npm i -g @openai/codex && pip install -r requirements.txt && python manage.py migrate",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "openai.chatgpt",
+        "GitHub.copilot",
+        "GitHub.copilot-chat",
+        "qwtel.sqlite-viewer"
+      ]
+    }
+  }
+}

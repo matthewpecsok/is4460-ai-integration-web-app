@@ -1,0 +1,31 @@
+{% extends "shop/base.html" %}
+
+{% block content %}
+<h2>Login</h2>
+
+{% if error %}
+<div style="background: #fee2e2; color: #991b1b; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+    {{ error }}
+</div>
+{% endif %}
+
+<form method="post" style="max-width: 400px;">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ request.GET.next|default:'' }}">
+    <div style="margin-bottom: 1rem;">
+        <label for="username" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Username:</label>
+        <input type="text" id="username" name="username" required style="width: 100%; padding: 0.5rem; border: 1px solid #dae2ef; border-radius: 4px; box-sizing: border-box;">
+    </div>
+    
+    <div style="margin-bottom: 1rem;">
+        <label for="password" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Password:</label>
+        <input type="password" id="password" name="password" required style="width: 100%; padding: 0.5rem; border: 1px solid #dae2ef; border-radius: 4px; box-sizing: border-box;">
+    </div>
+    
+    <button type="submit" style="background: #3b82f6; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Login</button>
+</form>
+
+<p style="margin-top: 1rem;">
+    Don't have an account? <a href="{% url 'register' %}">Register as a customer</a>
+</p>
+{% endblock %}

@@ -1,0 +1,21 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run Django Unit Tests",
+      "type": "shell",
+      "command": "python",
+      "args": ["manage.py", "test"],
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run Django Development Server",
+      "type": "shell",
+      "command": "python",
+      "args": ["manage.py", "runserver"],
+      "isBackground": true,
+      "problemMatcher": []
+    }
+  ]
+}

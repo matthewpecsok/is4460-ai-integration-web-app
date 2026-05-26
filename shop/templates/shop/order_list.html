@@ -1,0 +1,58 @@
+{% extends 'shop/base.html' %}
+
+{% block content %}
+<section class="page-heading">
+    <div>
+        <p class="eyebrow">{% if can_manage_orders %}Employee{% else %}Account{% endif %}</p>
+        <h1>{% if can_manage_orders %}Orders{% else %}My Orders{% endif %}</h1>
+    </div>
+    <div class="actions">
+        <a class="button secondary" href="{% url 'order_create' %}">Create Order</a>
+        {% if not can_manage_orders %}
+            <a class="button secondary" href="{% url 'product_list' %}">Continue Shopping</a>
+        {% endif %}
+    </div>
+</section>
+
+<table>
+    <thead>
+        <tr>
+            <th>Order</th>
+            <th>Customer</th>
+            <th>Items</th>
+            <th>Status</th>
+            <th>Total</th>
+            <th>Created</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for order in orders %}
+            <tr>
+                <td><a href="{% url 'order_detail' order.pk %}">Order #{{ order.pk }}</a></td>
+                <td>{{ order.customer_name }}</td>
+                <td>
+                    {% for product in order.products.all %}
+                        {{ product.name }}{% if not forloop.last %}, {% endif %}
+                    {% empty %}
+                        No products
+                    {% endfor %}
+                </td>
+                <td>{{ order.get_status_display }}</td>
+                <td>${{ order.total }}</td>
+                <td>{{ order.created_at|date:"M j, Y" }}</td>
+                <td>
+                    <a href="{% url 'order_update' order.pk %}">Edit</a>
+                    {% if can_delete_order %}
+                        | <a href="{% url 'order_delete' order.pk %}">Delete</a>
+                    {% endif %}
+                </td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="7">No orders created.</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
