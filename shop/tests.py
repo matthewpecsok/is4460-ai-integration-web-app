@@ -96,6 +96,26 @@ def test_list_products(client, product):
 
 
 @pytest.mark.django_db
+def test_product_list_chatbot_displays_recommendation(client, product, monkeypatch):
+	def fake_recommendation(question, products):
+		products = list(products)
+		assert question == "I need an anniversary gift"
+		assert products[0].name == "Rose Bouquet"
+		return "Rose Bouquet is a strong fit for an anniversary."
+
+	monkeypatch.setattr("shop.views.get_product_recommendation", fake_recommendation)
+
+	response = client.post(
+		reverse("product_list"),
+		{"recommendation_prompt": "I need an anniversary gift"},
+	)
+
+	assert response.status_code == 200
+	assert b"I need an anniversary gift" in response.content
+	assert b"Rose Bouquet is a strong fit" in response.content
+
+
+@pytest.mark.django_db
 def test_retrieve_product_detail(client, product):
 	response = client.get(reverse("product_detail", kwargs={"pk": product.pk}))
 

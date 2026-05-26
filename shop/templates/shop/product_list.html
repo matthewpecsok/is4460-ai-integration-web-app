@@ -17,6 +17,40 @@
     {% endif %}
 </section>
 
+<section class="chatbot panel" aria-labelledby="recommendation-heading">
+    <div>
+        <p class="eyebrow">Flower finder</p>
+        <h2 id="recommendation-heading">Ask for a recommendation</h2>
+    </div>
+    <form method="post" class="chatbot-form">
+        {% csrf_token %}
+        <label for="recommendation_prompt">Tell us what you are shopping for</label>
+        <textarea id="recommendation_prompt" name="recommendation_prompt" rows="3" maxlength="600" required placeholder="An anniversary gift under $40, something cheerful for a desk, sympathy flowers...">{{ recommendation_prompt }}</textarea>
+        <div class="actions">
+            <button type="submit">Recommend</button>
+        </div>
+    </form>
+
+    {% if recommendation_response or recommendation_error %}
+        <div class="chatbot-thread" aria-live="polite">
+            {% if recommendation_prompt %}
+                <div class="chat-message user">
+                    <strong>You</strong>
+                    <p>{{ recommendation_prompt }}</p>
+                </div>
+            {% endif %}
+            {% if recommendation_response %}
+                <div class="chat-message bot">
+                    <strong>Product guide</strong>
+                    <p>{{ recommendation_response|linebreaksbr }}</p>
+                </div>
+            {% else %}
+                <p class="feedback error">{{ recommendation_error }}</p>
+            {% endif %}
+        </div>
+    {% endif %}
+</section>
+
 <div class="product-grid">
     {% for product in products %}
         {% url 'checkout' product.pk as checkout_url %}

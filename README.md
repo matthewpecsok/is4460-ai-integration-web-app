@@ -48,6 +48,10 @@ docker compose up --build
 python manage.py test
 ```
 
+## Gemini Recommendations
+
+The product listing page includes a server-rendered recommendation chatbot. Set `GEMINI_API_KEY` before posting a recommendation request. You can also override `GEMINI_MODEL` and `GEMINI_TIMEOUT_SECONDS` if needed.
+
 ## Codespaces / Dev Container
 
 This repository includes a `.devcontainer/devcontainer.json` configuration that:

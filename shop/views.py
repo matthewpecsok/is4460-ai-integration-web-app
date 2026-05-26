@@ -16,6 +16,7 @@ from django.shortcuts import get_object_or_404, redirect
 logger = logging.getLogger("flower_shop.auth")
 
 from .forms import CustomerCheckoutForm, CustomerOrderForm, CustomerRegistrationForm, OrderForm
+from .gemini import GeminiNotConfigured, GeminiRecommendationError, get_product_recommendation
 from .models import Order, Product
 
 
@@ -86,6 +87,32 @@ class ProductListView(ListView):
 
 	def get_queryset(self):
 		return Product.objects.order_by("name")
+
+	def post(self, request, *args, **kwargs):
+		self.object_list = self.get_queryset()
+		products = list(self.object_list)
+		context = self.get_context_data()
+		question = request.POST.get("recommendation_prompt", "").strip()
+		context["recommendation_prompt"] = question
+
+		if not question:
+			context["recommendation_error"] = "Ask a question to get a product recommendation."
+		else:
+			try:
+				context["recommendation_response"] = get_product_recommendation(question, products)
+			except GeminiNotConfigured:
+				context["recommendation_error"] = "Product recommendations need a Gemini API key before they can answer."
+			except GeminiRecommendationError:
+				context["recommendation_error"] = "Product recommendations are unavailable right now. Please try again."
+
+		return self.render_to_response(context)
+
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		context.setdefault("recommendation_prompt", "")
+		context.setdefault("recommendation_response", "")
+		context.setdefault("recommendation_error", "")
+		return context
 
 
 class ProductDetailView(DetailView):

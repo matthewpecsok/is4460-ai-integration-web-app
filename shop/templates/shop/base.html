@@ -121,6 +121,50 @@
             grid-template-columns: repeat(auto-fit, minmax(235px, 1fr));
             gap: 1rem;
         }
+        .chatbot {
+            display: grid;
+            gap: 0.9rem;
+            margin-bottom: 1.25rem;
+        }
+        .chatbot h2 { font-size: 1.35rem; }
+        .chatbot-form {
+            display: grid;
+            gap: 0.75rem;
+        }
+        .chatbot-form textarea {
+            min-height: 6rem;
+            resize: vertical;
+        }
+        .chatbot-thread {
+            display: grid;
+            gap: 0.75rem;
+            border-top: 1px solid var(--line);
+            padding-top: 0.9rem;
+        }
+        .chat-message {
+            max-width: 760px;
+            padding: 0.75rem;
+            border: 1px solid #dae2ef;
+            border-radius: 8px;
+            background: #f8fbff;
+        }
+        .chat-message.user {
+            justify-self: end;
+            background: #edf7f2;
+            border-color: #cae8d9;
+        }
+        .chat-message strong {
+            display: block;
+            margin-bottom: 0.3rem;
+            color: var(--muted);
+            font-size: 0.78rem;
+            text-transform: uppercase;
+        }
+        .chat-message p:last-child, .feedback { margin-bottom: 0; }
+        .feedback.error {
+            color: #b42318;
+            font-weight: 700;
+        }
         .product-card, .panel {
             background: var(--surface);
             border: 1px solid var(--line);
