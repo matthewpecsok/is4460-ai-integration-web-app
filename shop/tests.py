@@ -1,10 +1,12 @@
+import json
 import logging
 
 import pytest
 from django.urls import reverse
 from django.contrib.auth.models import User, Group
-from django.test import Client
+from django.test import Client, override_settings
 
+from .gemini import get_product_recommendation
 from .models import Order, Product
 
 
@@ -15,6 +17,20 @@ class ListLogHandler(logging.Handler):
 
 	def emit(self, record):
 		self.records.append(record)
+
+
+class FakeGeminiResponse:
+	def __init__(self, payload):
+		self.payload = payload
+
+	def __enter__(self):
+		return self
+
+	def __exit__(self, exc_type, exc_value, traceback):
+		return False
+
+	def read(self):
+		return json.dumps(self.payload).encode("utf-8")
 
 
 @pytest.mark.django_db
@@ -113,6 +129,34 @@ def test_product_list_chatbot_displays_recommendation(client, product, monkeypat
 	assert response.status_code == 200
 	assert b"I need an anniversary gift" in response.content
 	assert b"Rose Bouquet is a strong fit" in response.content
+
+
+@pytest.mark.django_db
+@override_settings(GEMINI_API_KEY="test-key", GEMINI_MAX_OUTPUT_TOKENS=900)
+def test_gemini_uses_configured_output_token_limit(product, monkeypatch):
+	captured = {}
+
+	def fake_urlopen(request, timeout):
+		captured["payload"] = json.loads(request.data.decode("utf-8"))
+		captured["timeout"] = timeout
+		return FakeGeminiResponse(
+			{
+				"candidates": [
+					{
+						"content": {"parts": [{"text": "Rose Bouquet fits."}]},
+						"finishReason": "STOP",
+					}
+				]
+			}
+		)
+
+	monkeypatch.setattr("shop.gemini.urlopen", fake_urlopen)
+
+	response = get_product_recommendation("I need something cheerful", [product])
+
+	assert response == "Rose Bouquet fits."
+	assert captured["timeout"] == 10
+	assert captured["payload"]["generationConfig"]["maxOutputTokens"] == 900
 
 
 @pytest.mark.django_db

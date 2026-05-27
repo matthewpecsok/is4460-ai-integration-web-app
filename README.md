@@ -50,7 +50,7 @@ python manage.py test
 
 ## Gemini Recommendations
 
-The product listing page includes a server-rendered recommendation chatbot. Set `GEMINI_API_KEY` before posting a recommendation request. You can also override `GEMINI_MODEL` and `GEMINI_TIMEOUT_SECONDS` if needed.
+The product listing page includes a server-rendered recommendation chatbot. Set `GEMINI_API_KEY` before posting a recommendation request. You can also override `GEMINI_MODEL`, `GEMINI_TIMEOUT_SECONDS`, and `GEMINI_MAX_OUTPUT_TOKENS` if needed.
 
 ## Codespaces / Dev Container
 

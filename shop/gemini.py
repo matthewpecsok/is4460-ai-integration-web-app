@@ -33,7 +33,7 @@ def get_product_recommendation(question, products):
         ],
         "generationConfig": {
             "temperature": 0.4,
-            "maxOutputTokens": 350,
+            "maxOutputTokens": getattr(settings, "GEMINI_MAX_OUTPUT_TOKENS", 800),
         },
     }
     data = json.dumps(payload).encode("utf-8")
@@ -104,9 +104,15 @@ def get_product_recommendation(question, products):
         ) from exc
         
     llm_response = _extract_text(response_payload)
+    finish_reason = _extract_finish_reason(response_payload)
     logger.info(
         "gemini.recommendation_success",
-        extra={"payload": {"response": llm_response}},
+        extra={
+            "payload": {
+                "finish_reason": finish_reason,
+                "response": llm_response,
+            }
+        },
     )
     return llm_response
 
@@ -129,6 +135,7 @@ def _build_prompt(question, products):
     return (
         "You are a helpful flower shop product guide. Recommend products only from the catalog below. "
         "Prefer in-stock products, mention prices when possible, and keep the answer concise. "
+        "Respond in 2 to 4 complete sentences. "
         "If nothing fits, say so and suggest the closest available option.\n\n"
         f"Customer request: {question}\n\n"
         f"Catalog:\n{product_context}"
@@ -142,3 +149,7 @@ def _extract_text(response_payload):
         .get("parts", [])
     )
     return "\n".join(part.get("text", "") for part in parts).strip()
+
+
+def _extract_finish_reason(response_payload):
+    return response_payload.get("candidates", [{}])[0].get("finishReason", "")
