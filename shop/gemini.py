@@ -20,12 +20,15 @@ def get_product_recommendation(question, products):
     api_key = getattr(settings, "GEMINI_API_KEY", "")
     if not api_key:
         raise GeminiNotConfigured("GEMINI_API_KEY is not configured.")
+    
+    prompt = _build_prompt(question, products)
+    print(f"Generated prompt: {prompt}")
 
     payload = {
         "contents": [
             {
                 "role": "user",
-                "parts": [{"text": _build_prompt(question, products)}],
+                "parts": [{"text": prompt}],
             }
         ],
         "generationConfig": {
@@ -43,21 +46,69 @@ def get_product_recommendation(question, products):
         },
         method="POST",
     )
+    
 
     try:
-        with urlopen(request, timeout=getattr(settings, "GEMINI_TIMEOUT_SECONDS", 10)) as response:
+        with urlopen(
+            request,
+            timeout=getattr(settings, "GEMINI_TIMEOUT_SECONDS", 10),
+        ) as response:
             response_payload = json.loads(response.read().decode("utf-8"))
-    except HTTPError as exc:
-        logger.warning("gemini.http_error", extra={"payload": {"status_code": exc.code}})
-        raise GeminiRecommendationError("Gemini could not complete the recommendation.") from exc
-    except (URLError, TimeoutError, json.JSONDecodeError) as exc:
-        logger.warning("gemini.request_error", extra={"payload": {"error": str(exc)}})
-        raise GeminiRecommendationError("Gemini could not complete the recommendation.") from exc
 
-    recommendation = _extract_text(response_payload)
-    if not recommendation:
-        raise GeminiRecommendationError("Gemini returned an empty recommendation.")
-    return recommendation
+    except HTTPError as exc:
+        raw_response = exc.read().decode("utf-8", errors="replace")
+
+        try:
+            error_payload = json.loads(raw_response)
+            google_error = error_payload.get("error", {})
+            error_message = google_error.get("message", raw_response)
+            error_status = google_error.get("status")
+        except json.JSONDecodeError:
+            error_payload = {"raw_response": raw_response}
+            error_message = raw_response
+            error_status = None
+
+        logger.warning(
+            "gemini.http_error",
+            extra={
+                "payload": {
+                    "status_code": exc.code,
+                    "reason": str(exc.reason),
+                    "google_status": error_status,
+                    "message": error_message,
+                    "response_body": error_payload,
+                }
+            },
+        )
+
+        raise GeminiRecommendationError(
+            f"Gemini could not complete the recommendation: {error_message}"
+        ) from exc
+
+    except json.JSONDecodeError as exc:
+        logger.warning(
+            "gemini.invalid_json_response",
+            extra={"payload": {"error": str(exc)}},
+        )
+        raise GeminiRecommendationError(
+            "Gemini returned an invalid response."
+        ) from exc
+
+    except (URLError, TimeoutError) as exc:
+        logger.warning(
+            "gemini.request_error",
+            extra={"payload": {"error": str(exc)}},
+        )
+        raise GeminiRecommendationError(
+            "Gemini could not complete the recommendation because the request failed."
+        ) from exc
+        
+    llm_response = _extract_text(response_payload)
+    logger.info(
+        "gemini.recommendation_success",
+        extra={"payload": {"response": llm_response}},
+    )
+    return llm_response
 
 
 def _gemini_url():
@@ -77,7 +128,7 @@ def _build_prompt(question, products):
     product_context = "\n".join(product_lines) or "No products are currently listed."
     return (
         "You are a helpful flower shop product guide. Recommend products only from the catalog below. "
-        "Prefer in-stock products, mention prices when useful, and keep the answer concise. "
+        "Prefer in-stock products, mention prices when possible, and keep the answer concise. "
         "If nothing fits, say so and suggest the closest available option.\n\n"
         f"Customer request: {question}\n\n"
         f"Catalog:\n{product_context}"

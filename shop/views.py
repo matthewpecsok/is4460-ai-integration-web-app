@@ -100,10 +100,11 @@ class ProductListView(ListView):
 		else:
 			try:
 				context["recommendation_response"] = get_product_recommendation(question, products)
+				#context["recommendation_response"] = context["recommendation_response"]+"hi"
 			except GeminiNotConfigured:
 				context["recommendation_error"] = "Product recommendations need a Gemini API key before they can answer."
 			except GeminiRecommendationError:
-				context["recommendation_error"] = "Product recommendations are unavailable right now. Please try again."
+				context["recommendation_error"] = "Product recommendations are unavailable right now. Please try again..."
 
 		return self.render_to_response(context)
 
