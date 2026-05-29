@@ -103,10 +103,14 @@ def get_product_recommendation(question, products):
             "Gemini could not complete the recommendation because the request failed."
         ) from exc
         
+    logger.info(
+        "response",
+        extra=response_payload,
+    )
     llm_response = _extract_text(response_payload)
     finish_reason = _extract_finish_reason(response_payload)
     logger.info(
-        "gemini.recommendation_success",
+        "ai_recommend_result",
         extra={
             "payload": {
                 "finish_reason": finish_reason,
@@ -119,7 +123,7 @@ def get_product_recommendation(question, products):
 
 def _gemini_url():
     model = getattr(settings, "GEMINI_MODEL", "gemini-3.5-flash")
-    return f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+    return f"https://aiplatform.googleapis.com/v1/publishers/google/models/{model}:generateContent"
 
 
 def _build_prompt(question, products):
@@ -143,6 +147,7 @@ def _build_prompt(question, products):
 
 
 def _extract_text(response_payload):
+    
     parts = (
         response_payload.get("candidates", [{}])[0]
         .get("content", {})
