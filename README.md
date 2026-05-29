@@ -1,4 +1,4 @@
-# is4460-dynamic-app-lab-w-security
+# is4460-ai-integration-web-app
 
 Simple Django online flower shop application with:
 
