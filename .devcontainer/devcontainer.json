@@ -7,7 +7,6 @@
       "extensions": [
         "ms-python.python",
         "ms-python.vscode-pylance",
-        "openai.chatgpt",
         "GitHub.copilot",
         "GitHub.copilot-chat",
         "qwtel.sqlite-viewer"
